@@ -6,7 +6,20 @@ Real-time TikTok Live status detector built with **Bun**, **Hono**, **PostgreSQL
 
 ## ⚡ Quick Start
 
-### 1. Install & Run
+### Option A: Run with Docker Compose (Recommended)
+
+From root directory:
+```bash
+docker compose up -d live_detector
+```
+
+Or from module directory:
+```bash
+docker compose up -d
+```
+
+### Option B: Run with Bun Locally
+
 ```bash
 bun install
 bun run dev
@@ -14,7 +27,10 @@ bun run dev
 
 Server starts at `http://localhost:3030`. Open URL in your browser for the built-in UI Dashboard.
 
-### 2. Environment Variables (.env)
+---
+
+## ⚙️ Environment Variables (.env)
+
 ```bash
 cp .env.example .env
 ```
@@ -73,19 +89,47 @@ cp .env.example .env
 
 ---
 
-## 📡 Essential cURL Commands
+## 📡 API Reference & cURL Examples
 
+### 1. Register Creator to Monitor
 ```bash
-# Register creator to monitor
 curl -X POST http://localhost:3030/api/monitors \
   -H "Content-Type: application/json" \
-  -d '{"username": "tiktok", "webhookUrl": "https://n8n.yourdomain.com/webhook/tiktok-live", "intervalSeconds": 60}'
+  -d '{
+    "username": "tiktok",
+    "webhookUrl": "https://n8n.yourdomain.com/webhook/tiktok-live",
+    "intervalSeconds": 60
+  }'
+```
 
-# Check creator live status (cached in Redis for 30s)
+### 2. List Monitored Creators
+```bash
+curl http://localhost:3030/api/monitors
+```
+
+### 3. Check Status (Live or Cached)
+```bash
 curl http://localhost:3030/api/check/tiktok
+```
 
-# Test n8n webhook connection
+### 4. Force Check Creator Now
+```bash
+curl -X POST http://localhost:3030/api/monitors/tiktok/check
+```
+
+### 5. Test n8n Webhook Connection
+```bash
 curl -X POST http://localhost:3030/api/test-webhook \
   -H "Content-Type: application/json" \
   -d '{"webhookUrl": "https://n8n.yourdomain.com/webhook/tiktok-live"}'
+```
+
+### 6. View Webhook Logs
+```bash
+curl http://localhost:3030/api/logs
+```
+
+### 7. Delete Monitor
+```bash
+curl -X DELETE http://localhost:3030/api/monitors/tiktok
 ```

@@ -1,0 +1,21 @@
+# ponytail: minimal compose definition, connects to existing host postgres (5431) & redis (6380)
+services:
+  detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: katz_live_detector
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3030}:3030"
+    environment:
+      - PORT=${PORT:-3030}
+      - DATABASE_URL=${DATABASE_URL:-postgres://dethz:dethz198@host.docker.internal:5431/app}
+      - REDIS_URL=${REDIS_URL:-redis://host.docker.internal:6380}
+      - N8N_DEFAULT_WEBHOOK_URL=${N8N_DEFAULT_WEBHOOK_URL:-}
+      - CHECK_INTERVAL_SECONDS=${CHECK_INTERVAL_SECONDS:-60}
+      - INITIAL_USERNAMES=${INITIAL_USERNAMES:-}
+      - API_KEY=${API_KEY:-}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

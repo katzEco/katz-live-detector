@@ -1,0 +1,6 @@
+# ponytail: minimal context ignore
+node_modules
+.git
+.env
+*.sqlite*
+dist
