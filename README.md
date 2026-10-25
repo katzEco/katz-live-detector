@@ -53,39 +53,13 @@ cp .env.example .env
 - **PostgreSQL (`5431`)**: Stores monitors and webhook delivery logs using native `Bun.SQL` (zero npm dependencies).
 - **Redis (`6380`)**: In-memory status caching (30s TTL, 1ms latency) and distributed locks using native `Bun.RedisClient`.
 - **TikTok Detection**: Dual-engine detection with `tiktok-live-connector` + native HTML scraper fallback.
-- **n8n Webhook Dispatcher**: Delivers `live_started` and `live_ended` event payloads with automatic retry.
+- **n8n Webhook Dispatcher**: Pings webhook URL on `live_started` events (live stream end pings are omitted).
 
 ---
 
-## 🔗 n8n Webhook Payloads
+## 🔗 n8n Webhook Trigger
 
-#### Event: `live_started`
-```json
-{
-  "event": "live_started",
-  "username": "creator_name",
-  "isLive": true,
-  "timestamp": "2026-10-24T15:30:00.000Z",
-  "room": {
-    "roomId": "7693676830666705678",
-    "title": "Playing Games with Chat!",
-    "coverUrl": "https://p16-webcast.tiktokcdn.com/...",
-    "userCount": 450,
-    "liveUrl": "https://www.tiktok.com/@creator_name/live",
-    "startedAt": 1791323812
-  }
-}
-```
-
-#### Event: `live_ended`
-```json
-{
-  "event": "live_ended",
-  "username": "creator_name",
-  "isLive": false,
-  "timestamp": "2026-10-24T17:00:00.000Z"
-}
-```
+When a creator goes live, a `GET` ping is sent to your webhook URL. No ping is sent when the stream ends.
 
 ---
 

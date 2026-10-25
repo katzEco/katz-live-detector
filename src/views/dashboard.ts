@@ -193,24 +193,10 @@ export async function renderDashboardHtml(): Promise<string> {
         <h2>n8n Webhook Setup</h2>
         <ol style="margin-left: 1.2rem; color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1rem;">
           <li>Add a <strong>Webhook</strong> trigger node in your n8n workflow.</li>
-          <li>Set HTTP Method: <code>POST</code>.</li>
+          <li>Set HTTP Method: <code>GET</code>.</li>
           <li>Copy the <strong>Webhook URL</strong> from n8n into this detector.</li>
-          <li>Listen for <code>event === 'live_started'</code> or <code>'live_ended'</code>.</li>
+          <li>Trigger: simple HTTP <code>GET</code> ping to your webhook URL on live start/end.</li>
         </ol>
-
-        <h3 style="font-size: 0.95rem; margin-bottom: 0.5rem;">Sample Payload to n8n</h3>
-        <pre>{
-  "event": "live_started",
-  "username": "tiktok",
-  "isLive": true,
-  "timestamp": "2026-10-24T15:30:00.000Z",
-  "room": {
-    "roomId": "7693676830666705678",
-    "title": "Stream title",
-    "liveUrl": "https://www.tiktok.com/@tiktok/live",
-    "viewers": 120
-  }
-}</pre>
       </div>
     </div>
   </div>

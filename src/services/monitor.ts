@@ -114,25 +114,8 @@ export class MonitorSchedulerService {
 
       // State Transition: Live -> Offline
       if (wasLive && !isLiveNow) {
-        console.log(`[monitor-service] ⚪ @${username} ended stream. Triggering live_ended webhook...`);
-        await webhookService.dispatch({
-          webhookUrl: monitor.webhook_url,
-          username,
-          event: 'live_ended',
-          isLive: false,
-          room: monitor.last_room_id
-            ? {
-                roomId: monitor.last_room_id,
-                title: monitor.last_room_title || undefined,
-                coverUrl: monitor.last_room_cover || undefined,
-              }
-            : undefined,
-          meta: {
-            previousState: 'live',
-            lastRoomId: monitor.last_room_id,
-            streamEndedAt: result.checkedAt,
-          },
-        });
+        // ponytail: live ended; no ping sent per configuration
+        console.log(`[monitor-service] ⚪ @${username} ended stream (ping skipped)`);
       }
 
       return result;

@@ -90,12 +90,12 @@ monitorsRoute.post('/:username/check', async (c) => {
   const forceWebhook = c.req.query('forceWebhook') === 'true';
   const result = await monitorScheduler.runCheck(monitor);
 
-  if (forceWebhook && monitor.webhook_url) {
+  if (forceWebhook && monitor.webhook_url && result.isLive) {
     await webhookService.dispatch({
       webhookUrl: monitor.webhook_url,
       username: monitor.username,
-      event: result.isLive ? 'live_started' : 'live_ended',
-      isLive: result.isLive,
+      event: 'live_started',
+      isLive: true,
       room: result.room,
       meta: { manualTrigger: true },
     });

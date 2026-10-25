@@ -30,12 +30,12 @@ checkRoute.post('/', async (c) => {
   const sendWebhook = Boolean(body.sendWebhook);
   const webhookUrl = body.webhookUrl ? String(body.webhookUrl) : config.defaultWebhookUrl;
 
-  if (sendWebhook && webhookUrl) {
+  if (sendWebhook && webhookUrl && result.isLive) {
     webhookResult = await webhookService.dispatch({
       webhookUrl,
       username: result.username,
-      event: result.isLive ? 'live_started' : 'live_ended',
-      isLive: result.isLive,
+      event: 'live_started',
+      isLive: true,
       room: result.room,
       meta: { manualAdHocCheck: true },
     });

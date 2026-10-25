@@ -10,7 +10,7 @@ for (const arch of archs) {
     process.exit(1);
   }
 
-  const outfile = `dist/katz-todo-linux-${arch}`;
+  const outfile = `dist/katz-live-linux-${arch}`;
   const target = `bun-linux-${arch}` as const;
 
   console.log(`Building Linux SSE binary for ${target}...`);

@@ -1,17 +1,21 @@
-# ponytail: lean alpine bun image, zero build bloat
-FROM oven/bun:1-alpine AS runner
+# ponytail: multi-stage build using bun compile to standalone linux binary
+FROM oven/bun:1 AS builder
 WORKDIR /app
 
-# Install production dependencies
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
 
-# Copy application source
-COPY tsconfig.json ./
-COPY src ./src
+COPY . .
+RUN bun run build
 
-ENV NODE_ENV=production
+FROM debian:bookworm-slim AS runner
+WORKDIR /app
+
+# ponytail: copy ca-certificates from builder so HTTPS requests work without apt bloat
+COPY --from=builder /etc/ssl/certs /etc/ssl/certs
+COPY --from=builder /app/dist/katz-live-linux-* /usr/local/bin/katz-live
+
 ENV PORT=3030
 EXPOSE 3030
 
-CMD ["bun", "run", "src/index.ts"]
+CMD ["katz-live"]

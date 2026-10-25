@@ -13,7 +13,7 @@ export interface WebhookPayload {
 
 export class WebhookService {
   /**
-   * Dispatch webhook to n8n endpoint with retry
+   * Dispatch webhook to n8n endpoint with retry (defaults to GET)
    */
   public async dispatch(params: {
     webhookUrl: string;
@@ -22,8 +22,10 @@ export class WebhookService {
     isLive: boolean;
     room?: TikTokRoomDetails;
     meta?: Record<string, unknown>;
+    method?: 'GET' | 'POST';
   }): Promise<{ success: boolean; statusCode?: number; error?: string }> {
     const { webhookUrl, username, event, isLive, room, meta } = params;
+    const method = params.method || config.webhookMethod || 'GET';
 
     if (!webhookUrl) {
       const err = 'No webhook URL provided';
@@ -48,12 +50,20 @@ export class WebhookService {
     };
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       'User-Agent': 'katz-tiktok-live-detector/1.0',
     };
 
     if (config.webhookSecret) {
       headers['X-Webhook-Secret'] = config.webhookSecret;
+    }
+
+    // ponytail: pure ping on GET without any query params
+    const requestUrl = webhookUrl;
+    let requestBody: string | undefined;
+
+    if (method === 'POST') {
+      headers['Content-Type'] = 'application/json';
+      requestBody = JSON.stringify(payload);
     }
 
     let lastError: string | undefined;
@@ -66,10 +76,10 @@ export class WebhookService {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 10000);
 
-        const res = await fetch(webhookUrl, {
-          method: 'POST',
+        const res = await fetch(requestUrl, {
+          method,
           headers,
-          body: JSON.stringify(payload),
+          body: requestBody,
           signal: controller.signal,
         });
 
@@ -78,7 +88,6 @@ export class WebhookService {
         responseBody = await res.text();
 
         if (res.ok) {
-          // ponytail: fire and await log write to postgres
           await dbService.logWebhookDelivery({
             username,
             event,
@@ -88,7 +97,7 @@ export class WebhookService {
             responseBody,
           });
 
-          console.log(`[webhook] delivered ${event} for @${username} to ${webhookUrl} (status ${statusCode})`);
+          console.log(`[webhook] ${method} delivered ${event} for @${username} to ${webhookUrl} (status ${statusCode})`);
           return { success: true, statusCode };
         }
 
@@ -112,7 +121,7 @@ export class WebhookService {
       error: lastError,
     });
 
-    console.error(`[webhook] delivery failed for @${username} (${event}): ${lastError}`);
+    console.error(`[webhook] ${method} delivery failed for @${username} (${event}): ${lastError}`);
     return { success: false, statusCode, error: lastError };
   }
 }
